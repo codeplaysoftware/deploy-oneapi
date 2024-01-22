@@ -58,12 +58,12 @@ LATEST_AMD=oneapi-for-amd-gpus-$VERSION-rocm-5.4.3-linux.sh
 LATEST_NVIDIA=oneapi-for-nvidia-gpus-$VERSION-cuda-12.0-linux.sh
 if [[ "$install_amd" == "1" ]]; then
   rm -f packages/$LATEST_AMD
-  wget -P packages --content-disposition "$PLUGIN_URL&variant=amd&filters[]=linux&aat=$API_TOKEN"
+  wget -P packages --content-disposition "$PLUGIN_URL&variant=amd&version=$VERSION&filters[]=linux&aat=$API_TOKEN"
   bash packages/$LATEST_AMD -i $VERSION_DIR
 fi
 if [[ "$install_nvidia" == "1" ]]; then
   rm -f packages/$LATEST_NVIDIA
-  wget -P packages --content-disposition "$PLUGIN_URL&variant=nvidia&filters[]=linux&aat=$API_TOKEN"
+  wget -P packages --content-disposition "$PLUGIN_URL&variant=nvidia&version=$VERSION&filters[]=linux&aat=$API_TOKEN"
   bash packages/$LATEST_NVIDIA -i $VERSION_DIR
 fi
 
