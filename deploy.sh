@@ -35,6 +35,7 @@ done
 
 # You can get an API token from the Codeplay website
 if [[ -z $API_TOKEN && ($install_amd || $install_nvidia) ]]; then
+  echo "API_TOKEN has not been set in the environment!"
   usage
 fi
 
