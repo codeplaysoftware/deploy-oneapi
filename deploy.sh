@@ -4,6 +4,7 @@ set -euo pipefail
 
 name=$(basename -- "$0")
 
+install_basekit=1
 install_amd=0
 install_nvidia=0
 
@@ -27,6 +28,8 @@ for arg do
     (--nvidia)
       install_nvidia=1
       ;;
+    (--no-basekit)
+      install_basekit=0
     (*)
       usage
       ;;
@@ -44,16 +47,42 @@ VERSION=2024.0.1
 VERSION_DIR=2024.0
 BASEKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/163da6e4-56eb-4948-aba3-debcec61c064/l_BaseKit_p_2024.0.1.46_offline.sh
 
+#TODO: functions for these repeating sections
 mkdir -p $BASE_DIR/modulefiles $BASE_DIR/packages $BASE_DIR/public
 pushd $BASE_DIR
-if [[ ! -e $(basename $BASEKIT_URL) ]]; then
-  wget -P packages $BASEKIT_URL
-fi
-echo "Installing oneAPI BaseKit..."
-if [[ ! -e $VERSION_DIR ]]; then
-  bash packages/$(basename $BASEKIT_URL) -a -s --install-dir $VERSION_DIR --eula accept
+if [[ "$install_basekit" == "1" ]]; then
+  if [[ ! -e packages/$(basename $BASEKIT_URL) ]]; then
+    wget -P packages $BASEKIT_URL
+  fi
+  echo "Installing oneAPI BaseKit..."
+  if [[ ! -e $VERSION_DIR ]]; then
+    bash packages/$(basename $BASEKIT_URL) -a -s --install-dir $VERSION_DIR --eula accept
+  fi
+
+  # Patch oneAPI Fortran and SYCL compilers
+  DPCPP_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/bb99984f-370f-413d-bbec-38928d2458f2/l_dpcpp-cpp-compiler_p_2024.0.2.29_offline.sh
+  FORTRAN_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/41df6814-ec4b-4698-a14d-421ee2b02aa7/l_fortran-compiler_p_2024.0.2.28_offline.sh
+  if [[ ! -e packages/$(basename $DPCPP_URL) ]]; then
+    wget -P packages $DPCPP_URL
+  fi
+  echo "Patching oneAPI BaseKit SYCL Compiler..."
+  if [[ -e $VERSION_DIR ]]; then
+    bash packages/$(basename $DPCPP_URL) -a -s --install-dir $VERSION_DIR --eula accept
+  else
+    echo "Cannot patch when oneAPI Basekit is not installed!"
+  fi
+  if [[ ! -e packages/$(basename $FORTRAN_URL) ]]; then
+    wget -P packages $FORTRAN_URL
+  fi
+  echo "Patching oneAPI BaseKit Fortran Compiler..."
+  if [[ -e $VERSION_DIR ]]; then
+    bash packages/$(basename $FORTRAN_URL) -a -s --install-dir $VERSION_DIR --eula accept
+  else
+    echo "Cannot patch when oneAPI Basekit is not installed!"
+  fi
 fi
 
+# Download and install the plugins (but only the ones requested)
 PLUGIN_URL=https://developer.codeplay.com/api/v1/products/download?product=oneapi
 LATEST_AMD=oneapi-for-amd-gpus-$VERSION-rocm-5.4.3-linux.sh
 LATEST_NVIDIA=oneapi-for-nvidia-gpus-$VERSION-cuda-12.0-linux.sh
@@ -71,14 +100,10 @@ fi
 # Installs modulefiles. Make sure WD is the install dir. If the modulefiles
 # directory exists, the script asks if you'd like to remove the previous files.
 # --force would make it remove without asking, but there's no --keep option,
-# so we respond "no" but only when asked. This is fragile.
+# so we respond "no". This is fragile.
 TLD=$PWD
 pushd $VERSION_DIR
-if [[ -e $TLD/modulefiles ]]; then
-  echo n | ./modulefiles-setup.sh --output-dir=$TLD/modulefiles
-else
-  ./modulefiles-setup.sh --output-dir=$TLD/modulefiles
-fi
+yes n | ./modulefiles-setup.sh --output-dir=$TLD/modulefiles
 popd
 
 cat << EOF > public/oneapi-release
