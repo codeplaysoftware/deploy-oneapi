@@ -7,6 +7,7 @@ name=$(basename -- "$0")
 install_basekit=1
 install_amd=0
 install_nvidia=0
+patch_basekit=0
 
 usage() {
   echo "Usage:"
@@ -30,6 +31,10 @@ for arg do
       ;;
     (--no-basekit)
       install_basekit=0
+      ;;
+    (--patch)
+      patch_basekit=1
+      ;;
     (*)
       usage
       ;;
@@ -43,9 +48,10 @@ if [[ -z $API_TOKEN && ($install_amd || $install_nvidia) ]]; then
 fi
 
 BASE_DIR=oneapi-release
-VERSION=2024.0.1
-VERSION_DIR=2024.0
-BASEKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/163da6e4-56eb-4948-aba3-debcec61c064/l_BaseKit_p_2024.0.1.46_offline.sh
+VERSION=2024.1.0
+VERSION_DIR=2024.1
+BASEKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/fdc7a2bc-b7a8-47eb-8876-de6201297144/l_BaseKit_p_2024.1.0.596_offline.sh
+
 
 #TODO: functions for these repeating sections
 mkdir -p $BASE_DIR/modulefiles $BASE_DIR/packages $BASE_DIR/public
@@ -60,25 +66,28 @@ if [[ "$install_basekit" == "1" ]]; then
   fi
 
   # Patch oneAPI Fortran and SYCL compilers
-  DPCPP_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/bb99984f-370f-413d-bbec-38928d2458f2/l_dpcpp-cpp-compiler_p_2024.0.2.29_offline.sh
-  FORTRAN_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/41df6814-ec4b-4698-a14d-421ee2b02aa7/l_fortran-compiler_p_2024.0.2.28_offline.sh
-  if [[ ! -e packages/$(basename $DPCPP_URL) ]]; then
-    wget -P packages $DPCPP_URL
-  fi
-  echo "Patching oneAPI BaseKit SYCL Compiler..."
-  if [[ -e $VERSION_DIR ]]; then
-    bash packages/$(basename $DPCPP_URL) -a -s --install-dir $VERSION_DIR --eula accept
-  else
-    echo "Cannot patch when oneAPI Basekit is not installed!"
-  fi
-  if [[ ! -e packages/$(basename $FORTRAN_URL) ]]; then
-    wget -P packages $FORTRAN_URL
-  fi
-  echo "Patching oneAPI BaseKit Fortran Compiler..."
-  if [[ -e $VERSION_DIR ]]; then
-    bash packages/$(basename $FORTRAN_URL) -a -s --install-dir $VERSION_DIR --eula accept
-  else
-    echo "Cannot patch when oneAPI Basekit is not installed!"
+  if [[ "$patch_basekit" == "1" ]]; then
+    # TODO: these URLs are outdated but there's no patch version of the compiler (yet?)
+    DPCPP_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/bb99984f-370f-413d-bbec-38928d2458f2/l_dpcpp-cpp-compiler_p_2024.0.2.29_offline.sh
+    FORTRAN_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/41df6814-ec4b-4698-a14d-421ee2b02aa7/l_fortran-compiler_p_2024.0.2.28_offline.sh
+    if [[ ! -e packages/$(basename $DPCPP_URL) ]]; then
+      wget -P packages $DPCPP_URL
+    fi
+    echo "Patching oneAPI BaseKit SYCL Compiler..."
+    if [[ -e $VERSION_DIR ]]; then
+      bash packages/$(basename $DPCPP_URL) -a -s --install-dir $VERSION_DIR --eula accept
+    else
+      echo "Cannot patch when oneAPI Basekit is not installed!"
+    fi
+    if [[ ! -e packages/$(basename $FORTRAN_URL) ]]; then
+      wget -P packages $FORTRAN_URL
+    fi
+    echo "Patching oneAPI BaseKit Fortran Compiler..."
+    if [[ -e $VERSION_DIR ]]; then
+      bash packages/$(basename $FORTRAN_URL) -a -s --install-dir $VERSION_DIR --eula accept
+    else
+      echo "Cannot patch when oneAPI Basekit is not installed!"
+    fi
   fi
 fi
 
