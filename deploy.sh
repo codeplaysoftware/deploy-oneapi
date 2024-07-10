@@ -59,10 +59,10 @@ if [[ ($install_amd || $install_nvidia) ]]; then
 fi
 
 BASE_DIR=oneapi-release
-VERSION=2024.1.0
-VERSION_DIR=2024.1
-BASEKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/fdc7a2bc-b7a8-47eb-8876-de6201297144/l_BaseKit_p_2024.1.0.596_offline.sh
-HPCKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/7f096850-dc7b-4c35-90b5-36c12abd9eaa/l_HPCKit_p_2024.1.0.560_offline.sh
+VERSION=2024.2.0
+VERSION_DIR=2024.2
+BASEKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/9a98af19-1c68-46ce-9fdd-e249240c7c42/l_BaseKit_p_2024.2.0.634_offline.sh
+HPCKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/d4e49548-1492-45c9-b678-8268cb0f1b05/l_HPCKit_p_2024.2.0.635_offline.sh
 
 
 mkdir -p $BASE_DIR/modulefiles $BASE_DIR/packages $BASE_DIR/public
@@ -83,26 +83,23 @@ if [[ "$install_basekit" == "1" ]]; then
     bash packages/$(basename $HPCKIT_URL) -a -s --cli --install-dir $VERSION_DIR --eula accept
   fi
 
-  # Patch oneAPI Fortran and SYCL compilers
+  # Patch individual components
   if [[ "$patch_basekit" == "1" ]]; then
-    DPCPP_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/b6f11fab-a0ff-4d44-a5a0-ed59d0fa971c/l_dpcpp-cpp-compiler_p_2024.1.2.504_offline.sh
-    INTEL_GDB_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/fc87666c-d626-47bc-a861-a1578d2ecbd3/l_dpcpp_dbg_p_2024.1.0.439_offline.sh
+    DPCPP_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/6780ac84-6256-4b59-a647-330eb65f32b6/l_dpcpp-cpp-compiler_p_2024.2.0.495_offline.sh
+    INTEL_GDB_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/39f749d1-78e5-4a14-a4b2-5c17b6963a79/l_dpcpp_dbg_p_2024.2.0.565_offline.sh
     # TODO: fix this failing to install properly
-    #INTEL_MKL_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/2f3a5785-1c41-4f65-a2f9-ddf9e0db3ea0/l_onemkl_p_2024.1.0.695_offline.sh
-    FORTRAN_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/fd9342bd-7d50-442c-a3e4-f41974e14396/l_fortran-compiler_p_2024.1.0.465_offline.sh
+    INTEL_MKL_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/cdff21a5-6ac7-4b41-a7ec-351b5f9ce8fd/l_onemkl_p_2024.2.0.664_offline.sh
+    FORTRAN_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/801143de-6c01-4181-9911-57e00fe40181/l_fortran-compiler_p_2024.2.0.426_offline.sh
     get_install $DPCPP_URL "Patching SYCL Compiler"
     get_install $INTEL_GDB_URL "Patching Intel GDB"
-    #get_install $INTEL_MKL_URL "Patching Intel MKL"
-    if [[ -e $VERSION_DIR/hpckit ]]; then
-      # TODO: why is this not installing properly? missing ifx from HPC kit
-      #get_install $FORTRAN_URL "Patching FORTRAN Compiler"
-      echo "Skipping fortran patch step"
-    fi
+    get_install $INTEL_MKL_URL "Patching Intel MKL"
+    get_install $FORTRAN_URL "Patching FORTRAN Compiler"
   fi
 fi
 
 # Download and install the plugins (but only the ones requested)
-ROCM_VERSION=5.4.3
+# ROCM_VERSION can be 5.4.3, 5.7.1, 6.0.2 or 6.1.0, defaults 5.4.3
+: ${ROCM_VERSION:=5.4.3}
 CUDA_VERSION=12.0
 PLUGIN_URL=https://developer.codeplay.com/api/v1/products/download?product=oneapi
 LATEST_AMD=oneapi-for-amd-gpus-$VERSION-rocm-$ROCM_VERSION-linux.sh
