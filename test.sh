@@ -11,9 +11,8 @@
 # account, and so on.
 
 module load gcc nvidia/nvhpc
-module use oneapi-relase/public
-module load oneapi-release
-module load compiler
+module use $ONEAPI_DIR/modulefiles
+module load tbb oclfpga compiler-rt compiler
 
 srun sycl-ls
 srun test
