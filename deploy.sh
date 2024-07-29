@@ -8,10 +8,11 @@ install_basekit=1
 install_amd=0
 install_nvidia=0
 patch_basekit=0
+install_modulefiles=1
 
 usage() {
   echo "Usage:"
-  echo -e "${name}" '[--amd]' '[--nvidia]' '[--patch]' '[--help]\n'
+  echo -e "${name}" '[--amd]' '[--nvidia]' '[--patch]' '[--no-basekit]' '[--no-modulefiles]' '[--help]\n'
   echo "Installs oneAPI and plugins for specified backends"
   echo "API_TOKEN must be in the environment to download plugins from Codeplay"
   exit
@@ -46,6 +47,9 @@ for arg do
       ;;
     (--patch)
       patch_basekit=1
+      ;;
+    (--no-modulefiles)
+      install_modulefiles=0
       ;;
     (*)
       usage
@@ -120,11 +124,12 @@ fi
 # --force would make it remove without asking, but there's no --keep option,
 # so we respond "no". This is fragile.
 TLD=$PWD
-pushd $VERSION_DIR
-echo n | ./modulefiles-setup.sh --output-dir=$TLD/modulefiles
-popd
+if [[ "$install_modulefiles" == "1" ]]; then
+  pushd $VERSION_DIR
+  echo n | ./modulefiles-setup.sh --output-dir=$TLD/modulefiles
+  popd
 
-cat << EOF > public/oneapi-release
+  cat << EOF > public/oneapi-release
 #%Module1.0###################################################################
 # Meta-module for oneAPI Base ToolKit Releases
 #
@@ -137,9 +142,11 @@ proc ModulesHelp { } {
 
 module use $TLD/modulefiles
 EOF
-popd
+  popd
+fi
+
 echo "Installation complete! Try:"
-echo "module load oneapi-release/public/oneapi-release"
+echo "module use $TLD/modulefiles"
 echo "module load tbb compiler-rt oclfpga compiler"
 echo "icpx --version"
 

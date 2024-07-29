@@ -9,13 +9,25 @@ they want enabled in any given session.
 
 * `--install-amd`
 * `--install-nvidia`
+* `--patch`
 * `--no-basekit`
+* `--no-modulefiles`
 
 The two install options tell the script to download and install the respective
 plugins from the Codeplay website. This will only work if it can find the
-Basekit install folder. The last option skips installing the Basekit if (for
-example) all that needs updated is which plugin is installed, or to save time
-when making other updates.
+Basekit install folder.
+
+`--patch` will patch the components of the oneAPI release to their newer
+versions, if available.
+
+`--no-basekit` skips installing the Basekit if (for example) all that needs
+updated is which plugin is installed, or to save time when making other
+updates.
+
+`--no-modulefiles` can be useful if installing oneAPI to a location from
+which it will later be copied, as the generated modulefiles use non-relative
+links to point to the modulefiles inside the install directory.
+
 
 ## API Token
 
