@@ -1,5 +1,7 @@
 # deploy.sh
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/codeplaysoftware/deploy-oneapi/badge)](https://scorecard.dev/viewer/?uri=github.com/codeplaysoftware/deploy-oneapi)
+
 This script will attempt to download and install given versions of the Intel
 oneAPI Basekit using the offline installers. It's designed to work on various
 HPC systems which depend on modulefiles to let users choose which packages
