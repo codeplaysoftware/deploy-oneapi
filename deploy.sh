@@ -63,10 +63,10 @@ if [[ ($install_amd || $install_nvidia) ]]; then
 fi
 
 BASE_DIR=oneapi-release
-VERSION=2024.2.0
-VERSION_DIR=2024.2
-BASEKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/9a98af19-1c68-46ce-9fdd-e249240c7c42/l_BaseKit_p_2024.2.0.634_offline.sh
-HPCKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/d4e49548-1492-45c9-b678-8268cb0f1b05/l_HPCKit_p_2024.2.0.635_offline.sh
+VERSION=2025.0.0
+VERSION_DIR=2025.0
+BASEKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/96aa5993-5b22-4a9b-91ab-da679f422594/intel-oneapi-base-toolkit-2025.0.0.885_offline.sh
+HPCKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/0884ef13-20f3-41d3-baa2-362fc31de8eb/intel-oneapi-hpc-toolkit-2025.0.0.825_offline.sh
 
 
 mkdir -p $BASE_DIR/modulefiles $BASE_DIR/packages $BASE_DIR/public
@@ -89,13 +89,13 @@ if [[ "$install_basekit" == "1" ]]; then
 
   # Patch individual components
   if [[ "$patch_basekit" == "1" ]]; then
-    DPCPP_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/6780ac84-6256-4b59-a647-330eb65f32b6/l_dpcpp-cpp-compiler_p_2024.2.0.495_offline.sh
-    INTEL_GDB_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/39f749d1-78e5-4a14-a4b2-5c17b6963a79/l_dpcpp_dbg_p_2024.2.0.565_offline.sh
-    # TODO: fix this failing to install properly
-    INTEL_MKL_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/cdff21a5-6ac7-4b41-a7ec-351b5f9ce8fd/l_onemkl_p_2024.2.0.664_offline.sh
-    FORTRAN_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/801143de-6c01-4181-9911-57e00fe40181/l_fortran-compiler_p_2024.2.0.426_offline.sh
+    DPCPP_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/1cac4f39-2032-4aa9-86d7-e4f3e40e4277/intel-dpcpp-cpp-compiler-2025.0.3.9_offline.sh
+    INTEL_GDB_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/ecb8058f-69e1-4f61-a89b-f96e08f3ba2b/intel-dpcpp-dbg-2025.0.0.665_offline.sh
+    INTEL_MKL_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/246ea40e-5aa7-42a4-81fa-0c029dc8650f/intel-onemkl-2025.0.1.16_offline.sh
+    FORTRAN_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/fafa2df1-4bb1-43f7-87c6-3c82f1bdc712/intel-fortran-compiler-2025.0.3.9_offline.sh
     get_install $DPCPP_URL "Patching SYCL Compiler"
-    get_install $INTEL_GDB_URL "Patching Intel GDB"
+    # GDB unchanged from base install
+    #get_install $INTEL_GDB_URL "Patching Intel GDB"
     get_install $INTEL_MKL_URL "Patching Intel MKL"
     get_install $FORTRAN_URL "Patching FORTRAN Compiler"
   fi
@@ -147,6 +147,6 @@ fi
 
 echo "Installation complete! Try:"
 echo "module use $TLD/modulefiles"
-echo "module load tbb compiler-rt oclfpga compiler"
+echo "module load tbb compiler-rt umf compiler"
 echo "icpx --version"
 

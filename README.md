@@ -28,7 +28,6 @@ updates.
 which it will later be copied, as the generated modulefiles use non-relative
 links to point to the modulefiles inside the install directory.
 
-
 ## API Token
 
 An API token can be obtained from the Codeplay website. To stop the token
