@@ -14,7 +14,6 @@ usage() {
   echo "Usage:"
   echo -e "${name}" '[--amd]' '[--nvidia]' '[--patch]' '[--no-basekit]' '[--no-modulefiles]' '[--help]\n'
   echo "Installs oneAPI and plugins for specified backends"
-  echo "API_TOKEN must be in the environment to download plugins from Codeplay"
   exit
 }
 
@@ -57,16 +56,11 @@ for arg do
   esac
 done
 
-# You can get an API token from the Codeplay website
-if [[ ($install_amd || $install_nvidia) ]]; then
-  echo ${API_TOKEN:?"API_TOKEN must be set in the environment!"} > /dev/null
-fi
-
 BASE_DIR=oneapi-release
-VERSION=2025.0.0
-VERSION_DIR=2025.0
-BASEKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/96aa5993-5b22-4a9b-91ab-da679f422594/intel-oneapi-base-toolkit-2025.0.0.885_offline.sh
-HPCKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/0884ef13-20f3-41d3-baa2-362fc31de8eb/intel-oneapi-hpc-toolkit-2025.0.0.825_offline.sh
+VERSION=2025.1.0
+VERSION_DIR=2025.1
+BASEKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/cca951e1-31e7-485e-b300-fe7627cb8c08/intel-oneapi-base-toolkit-2025.1.0.651_offline.sh
+HPCKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/d0df6732-bf5c-493b-a484-6094bea53787/intel-oneapi-hpc-toolkit-2025.1.0.666_offline.sh
 
 
 mkdir -p $BASE_DIR/modulefiles $BASE_DIR/packages $BASE_DIR/public
@@ -89,33 +83,30 @@ if [[ "$install_basekit" == "1" ]]; then
 
   # Patch individual components
   if [[ "$patch_basekit" == "1" ]]; then
-    DPCPP_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/1cac4f39-2032-4aa9-86d7-e4f3e40e4277/intel-dpcpp-cpp-compiler-2025.0.3.9_offline.sh
-    INTEL_GDB_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/ecb8058f-69e1-4f61-a89b-f96e08f3ba2b/intel-dpcpp-dbg-2025.0.0.665_offline.sh
-    INTEL_MKL_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/246ea40e-5aa7-42a4-81fa-0c029dc8650f/intel-onemkl-2025.0.1.16_offline.sh
-    FORTRAN_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/fafa2df1-4bb1-43f7-87c6-3c82f1bdc712/intel-fortran-compiler-2025.0.3.9_offline.sh
-    get_install $DPCPP_URL "Patching SYCL Compiler"
-    # GDB unchanged from base install
+    DPCPP_URL=
+    INTEL_GDB_URL=
+    INTEL_MKL_URL=
+    FORTRAN_URL=
+    # Components not yet patched for 2025.1
+    #get_install $DPCPP_URL "Patching SYCL Compiler"
     #get_install $INTEL_GDB_URL "Patching Intel GDB"
-    get_install $INTEL_MKL_URL "Patching Intel MKL"
-    get_install $FORTRAN_URL "Patching FORTRAN Compiler"
+    #get_install $INTEL_MKL_URL "Patching Intel MKL"
+    #get_install $FORTRAN_URL "Patching FORTRAN Compiler"
   fi
 fi
 
 # Download and install the plugins (but only the ones requested)
-# ROCM_VERSION can be 5.4.3, 5.7.1, 6.0.2 or 6.1.0, defaults 5.4.3
-: ${ROCM_VERSION:=5.4.3}
-CUDA_VERSION=12.0
 PLUGIN_URL=https://developer.codeplay.com/api/v1/products/download?product=oneapi
-LATEST_AMD=oneapi-for-amd-gpus-$VERSION-rocm-$ROCM_VERSION-linux.sh
-LATEST_NVIDIA=oneapi-for-nvidia-gpus-$VERSION-cuda-$CUDA_VERSION-linux.sh
+LATEST_AMD=oneapi-for-amd-gpus-$VERSION-linux.sh
+LATEST_NVIDIA=oneapi-for-nvidia-gpus-$VERSION-linux.sh
 if [[ "$install_amd" == "1" ]]; then
   rm -f packages/$LATEST_AMD
-  wget -P packages --content-disposition "$PLUGIN_URL&variant=amd&version=$VERSION&filters[]=rocm-$ROCM_VERSION&filters[]=linux&aat=$API_TOKEN"
+  wget -P packages --content-disposition "$PLUGIN_URL&variant=amd&version=$VERSION&filters[]=linux"
   bash packages/$LATEST_AMD -i $VERSION_DIR -y
 fi
 if [[ "$install_nvidia" == "1" ]]; then
   rm -f packages/$LATEST_NVIDIA
-  wget -P packages --content-disposition "$PLUGIN_URL&variant=nvidia&version=$VERSION&filters[]=cuda-$CUDA_VERSION&filters[]=linux&aat=$API_TOKEN"
+  wget -P packages --content-disposition "$PLUGIN_URL&variant=nvidia&version=$VERSION&filters[]=linux"
   bash packages/$LATEST_NVIDIA -i $VERSION_DIR -y
 fi
 
@@ -143,10 +134,9 @@ proc ModulesHelp { } {
 module use $TLD/modulefiles
 EOF
   popd
+  echo "Try:"
+  echo "module use $TLD/modulefiles"
+  echo "module load tbb compiler-rt umf compiler"
+  echo "icpx --version"
 fi
-
-echo "Installation complete! Try:"
-echo "module use $TLD/modulefiles"
-echo "module load tbb compiler-rt umf compiler"
-echo "icpx --version"
-
+echo "Installation complete!"

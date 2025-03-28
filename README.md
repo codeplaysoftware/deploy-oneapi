@@ -27,9 +27,3 @@ updates.
 `--no-modulefiles` can be useful if installing oneAPI to a location from
 which it will later be copied, as the generated modulefiles use non-relative
 links to point to the modulefiles inside the install directory.
-
-## API Token
-
-An API token can be obtained from the Codeplay website. To stop the token
-being saved in the user's history, it is looked for in the environment, as
-the token is a secret and shouldn't be shared.
