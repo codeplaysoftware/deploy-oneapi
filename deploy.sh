@@ -57,10 +57,10 @@ for arg do
 done
 
 BASE_DIR=oneapi-release
-VERSION=2025.1.0
-VERSION_DIR=2025.1
-BASEKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/cca951e1-31e7-485e-b300-fe7627cb8c08/intel-oneapi-base-toolkit-2025.1.0.651_offline.sh
-HPCKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/d0df6732-bf5c-493b-a484-6094bea53787/intel-oneapi-hpc-toolkit-2025.1.0.666_offline.sh
+VERSION=2025.2.0
+VERSION_DIR=2025.2
+BASEKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/bd1d0273-a931-4f7e-ab76-6a2a67d646c7/intel-oneapi-base-toolkit-2025.2.0.592.sh
+HPCKIT_URL=https://registrationcenter-download.intel.com/akdlm/IRC_NAS/e974de81-57b7-4ac1-b039-0512f8df974e/intel-oneapi-hpc-toolkit-2025.2.0.575_offline.sh
 
 
 mkdir -p $BASE_DIR/modulefiles $BASE_DIR/packages $BASE_DIR/public
@@ -87,7 +87,7 @@ if [[ "$install_basekit" == "1" ]]; then
     INTEL_GDB_URL=
     INTEL_MKL_URL=
     FORTRAN_URL=
-    # Components not yet patched for 2025.1
+    # Components not yet patched for 2025.2
     #get_install $DPCPP_URL "Patching SYCL Compiler"
     #get_install $INTEL_GDB_URL "Patching Intel GDB"
     #get_install $INTEL_MKL_URL "Patching Intel MKL"
